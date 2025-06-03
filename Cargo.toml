@@ -1,0 +1,18 @@
+[package]
+edition = "2024"
+name    = "windows-simple-zstd"
+version = "0.1.0"
+
+[dependencies]
+anyhow  = "1"
+assert2 = "0.3.15"
+clap    = { version = "4.5.4", features = ["derive"] }
+rayon   = "1"
+rfd     = "0.15"
+tar     = "0.4"
+walkdir = "2"
+winreg  = "0.55"
+zstd    = { version = "0.13.3", features = ["zstdmt"] }
+
+[dev-dependencies]
+tempfile = "3.20.0"

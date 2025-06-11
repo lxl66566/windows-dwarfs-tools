@@ -1,18 +1,24 @@
 [package]
 edition = "2024"
-name    = "windows-simple-zstd"
-version = "0.1.0"
+name    = "windows-dwarfs-tools"
+version = "0.2.0"
 
 [dependencies]
 anyhow  = "1"
 assert2 = "0.3.15"
-clap    = { version = "4.5.4", features = ["derive"] }
-rayon   = "1"
+clap    = { version = "4.5", features = ["derive"] }
+once-fn = "0.2.0"
 rfd     = "0.15"
-tar     = "0.4"
-walkdir = "2"
 winreg  = "0.55"
-zstd    = { version = "0.13.3", features = ["zstdmt"] }
+zstd    = "0.13"
 
 [dev-dependencies]
-tempfile = "3.20.0"
+
+[build-dependencies]
+zstd = "0.13"
+
+[profile.release]
+lto       = true
+opt-level = "z"
+panic     = "abort"
+strip     = true

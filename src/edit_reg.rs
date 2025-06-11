@@ -2,8 +2,8 @@ use anyhow::{Result, anyhow};
 use std::env;
 use winreg::{RegKey, enums::*};
 
-const MENU_NAME: &str = "Zstd 工具"; // 主菜单项名称
-const FILE_SHELL_PATH: &str = "*\\shell"; // 应用于所有文件
+const MENU_NAME: &str = "Dwarfs 工具"; // 主菜单项名称
+const FILE_SHELL_PATH: &str = ".dwarfs\\shell"; // 应用于文件
 const DIRECTORY_SHELL_PATH: &str = "Directory\\shell"; // 应用于文件夹本身和文件夹背景空白处
 const FOLDER_SHELL_PATH: &str = "Folder\\shell"; // 主要应用于文件夹项本身
 
@@ -53,14 +53,13 @@ pub fn add_context_menu_entries() -> Result<()> {
         .or_else(|_| hkcu.create_subkey("Software\\Classes").map(|x| x.0))?;
 
     // 为不同的关联类型添加菜单
-    // "*" 用于文件
     add_menu_for_shell_path_prefix(&classes_key, FILE_SHELL_PATH, exe_path)?;
     // "Directory" 用于文件夹和文件夹背景
     add_menu_for_shell_path_prefix(&classes_key, DIRECTORY_SHELL_PATH, exe_path)?;
     // "Folder" 通常也建议添加，以确保覆盖文件夹项
     add_menu_for_shell_path_prefix(&classes_key, FOLDER_SHELL_PATH, exe_path)?;
 
-    println!("成功添加右键菜单项：Zstd 工具");
+    println!("成功添加右键菜单项：{MENU_NAME}");
     Ok(())
 }
 

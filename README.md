@@ -2,7 +2,7 @@
 
 English | [简体中文](README_zh-CN.md)
 
-A tool dedicated to making it easier for Windows users to compress and decompress files using [dwarfs](https://github.com/mhx/dwarfs). It adds right-click menu options to Windows, allowing users to directly perform zstd compression and decompression operations by right-clicking on files or folders.
+A tool dedicated to making it easier for Windows users to compress and decompress files using [dwarfs](https://github.com/mhx/dwarfs). It adds right-click menu options to Windows, allowing users to directly perform zstd/lzma based dwarfs compression and decompression operations by right-clicking on files or folders.
 
 windows-dwarfs-tools comes with a built-in 64-bit dwarfs executable and winfsp dll, making it ready to use on Windows systems without the hassle of installing dependencies.
 
@@ -24,6 +24,7 @@ After installation, simply run the exe or run it from the command line without a
 
 - dwarfs can only compress folders, not individual files.
 - In addition to the right-click menu, this project also provides a command-line interface. Please run `windows-dwarfs-tools -h` for help information.
+  - Uninstalling the menu requires running the command line.
 
 For explanations of compression levels, please refer to the dwarfs documentation:
 

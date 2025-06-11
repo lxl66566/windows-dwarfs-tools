@@ -20,9 +20,10 @@ windows-dwarfs-tools 内置了 64 位的 dwarfs 可执行文件和 winfsp dll，
 
 ## 提示
 
+- dwarfs 仅能压缩文件夹，不支持压缩单个文件。
 - 除了右键菜单，本项目也提供了命令行接口。请运行 `windows-dwarfs-tools -h` 查看帮助信息。
 
-压缩等级的说明可以参考 dwarfs 的文档：
+关于压缩等级的说明，可以参考 dwarfs 的文档：
 
 | Level | Block Size | Compression Algorithm (Block Data) | Compression Algorithm (Schema/History) | Compression Algorithm (Metadata) | Window Size/Step | Inode Order |
 | ----- | ---------- | ---------------------------------- | -------------------------------------- | -------------------------------- | ---------------- | ----------- |

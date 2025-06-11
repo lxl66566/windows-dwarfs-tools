@@ -2,121 +2,121 @@ use anyhow::{Result, anyhow};
 use std::env;
 use winreg::{RegKey, enums::*};
 
-const MENU_NAME: &str = "Dwarfs 工具"; // 主菜单项名称
-const FILE_SHELL_PATH: &str = ".dwarfs\\shell"; // 应用于文件
-const DIRECTORY_SHELL_PATH: &str = "Directory\\shell"; // 应用于文件夹本身和文件夹背景空白处
-const FOLDER_SHELL_PATH: &str = "Folder\\shell"; // 主要应用于文件夹项本身
+const MENU_NAME: &str = env!("CARGO_PKG_NAME"); // Main menu item name
+const FILE_SHELL_PATH: &str = ".dwarfs\\shell"; // Applies to files
+const DIRECTORY_SHELL_PATH: &str = "Directory\\shell"; // Applies to folders themselves and folder background
+const FOLDER_SHELL_PATH: &str = "Folder\\shell"; // Primarily applies to folder items themselves
 
-// 子命令定义
+// Subcommand definition
 struct SubCommandInfo<'a> {
-    key_name: &'a str,     // 在注册表中用作子菜单项的键名
-    display_name: &'a str, // 在右键菜单中显示的名称
-    arg_template: &'a str, // 命令参数模板, {} 会被 exe_path 替换
+    key_name: &'a str,     // Key name used for the submenu item in the registry
+    display_name: &'a str, // Name displayed in the context menu
+    arg_template: &'a str, // Command argument template, {} will be replaced by exe_path
 }
 
-// 子命令列表
+// Subcommand list
 const SUB_COMMANDS: [SubCommandInfo; 4] = [
     SubCommandInfo {
         key_name: "CompressQuick",
-        display_name: "快速压缩",
-        arg_template: "\"{}\" c \"%1\"", // 注意路径和参数的引号
+        display_name: "Quick Compress",
+        arg_template: "\"{}\" c \"%1\"", // Note quotes for path and arguments
     },
     SubCommandInfo {
         key_name: "CompressTo",
-        display_name: "压缩到...",
+        display_name: "Compress to...",
         arg_template: "\"{}\" c -i \"%1\"",
     },
     SubCommandInfo {
         key_name: "DecompressQuick",
-        display_name: "快速解压",
+        display_name: "Quick Decompress",
         arg_template: "\"{}\" d \"%1\"",
     },
     SubCommandInfo {
         key_name: "DecompressTo",
-        display_name: "解压到...",
+        display_name: "Decompress to...",
         arg_template: "\"{}\" d -i \"%1\"",
     },
 ];
 
-/// 添加右键菜单项。
+/// Adds context menu entries.
 ///
-/// 为文件和文件夹添加一个可展开的右键菜单，子命令直接定义在主菜单的 shell 子键下。
+/// Adds an expandable context menu for files and folders, with subcommands defined directly under the main menu's shell subkey.
 pub fn add_context_menu_entries() -> Result<()> {
     let current_exe = env::current_exe()?;
     let exe_path = current_exe
         .to_str()
-        .ok_or_else(|| anyhow!("无效的可执行文件路径"))?;
+        .ok_or_else(|| anyhow!("Invalid executable path"))?;
 
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let classes_key = hkcu
         .open_subkey_with_flags("Software\\Classes", KEY_WRITE)
         .or_else(|_| hkcu.create_subkey("Software\\Classes").map(|x| x.0))?;
 
-    // 为不同的关联类型添加菜单
+    // Add menus for different association types
     add_menu_for_shell_path_prefix(&classes_key, FILE_SHELL_PATH, exe_path)?;
-    // "Directory" 用于文件夹和文件夹背景
+    // "Directory" for folders and folder background
     add_menu_for_shell_path_prefix(&classes_key, DIRECTORY_SHELL_PATH, exe_path)?;
-    // "Folder" 通常也建议添加，以确保覆盖文件夹项
+    // "Folder" is also usually recommended to ensure coverage for folder items
     add_menu_for_shell_path_prefix(&classes_key, FOLDER_SHELL_PATH, exe_path)?;
 
-    println!("成功添加右键菜单项：{MENU_NAME}");
+    println!("Successfully added context menu entries: {MENU_NAME}");
     Ok(())
 }
 
-/// 为指定的 shell 路径前缀（如 "*\\shell"）添加主菜单及其所有子菜单项。
+/// Adds the main menu and all its submenu items for the specified shell path prefix (e.g., "*\\shell").
 fn add_menu_for_shell_path_prefix(
     classes_key: &RegKey,    // HKCU\Software\Classes
-    shell_path_prefix: &str, // 例如 "*\\shell", "Directory\\shell"
+    shell_path_prefix: &str, // E.g., "*\\shell", "Directory\\shell"
     exe_path: &str,
 ) -> Result<()> {
-    // 1. 创建主菜单项的键，例如 HKCU\Software\Classes\*\shell\Zstd 工具
+    // 1. Create the main menu item key, e.g., HKCU\Software\Classes\*\shell\Zstd Tool
     let (main_menu_key, _) =
         classes_key.create_subkey(format!("{}\\{}", shell_path_prefix, MENU_NAME))?;
 
-    // 设置主菜单的显示名称
+    // Set the display name for the main menu
     main_menu_key.set_value("MUIVerb", &MENU_NAME)?;
-    // (可选) 为主菜单设置图标，指向你的程序和图标索引 (0通常是第一个)
+    // (Optional) Set an icon for the main menu, pointing to your program and icon index (0 is usually the first)
     main_menu_key.set_value("Icon", &format!("\"{}\",0", exe_path))?;
 
-    // (可选但推荐) 设置 SubCommands 为空字符串，以明确指示这是一个包含子命令的菜单。
-    // 即使子命令是直接在其下的 "shell" 子键中定义的。
+    // (Optional but recommended) Set SubCommands to an empty string to explicitly indicate this is a menu with subcommands.
+    // Even if subcommands are defined directly under its "shell" subkey.
     main_menu_key.set_value("SubCommands", &"")?;
 
-    // 2. 在主菜单项下创建 "shell" 子键，用于存放所有子命令项
-    // 例如 HKCU\Software\Classes\*\shell\Zstd 工具\shell
+    // 2. Create a "shell" subkey under the main menu item to hold all subcommand items
+    // E.g., HKCU\Software\Classes\*\shell\Zstd Tool\shell
     let (sub_menu_container_key, _) = main_menu_key.create_subkey("shell")?;
 
-    // 3. 在这个 "shell" 子键下添加每一个子命令项
+    // 3. Add each subcommand item under this "shell" subkey
     for sc_info in SUB_COMMANDS.iter() {
-        // 创建子菜单项的键，例如 HKCU\Software\Classes\*\shell\Zstd 工具\shell\CompressQuick
+        // Create the subcommand item key, e.g., HKCU\Software\Classes\*\shell\Zstd Tool\shell\CompressQuick
         let (sub_command_entry_key, _) = sub_menu_container_key.create_subkey(sc_info.key_name)?;
 
-        // 设置子菜单项的显示名称
+        // Set the display name for the subcommand item
         sub_command_entry_key.set_value("MUIVerb", &sc_info.display_name)?;
-        // (可选) 为子菜单项设置图标
+        // (Optional) Set an icon for the subcommand item
         // sub_command_entry_key.set_value("Icon", &format!("\"{}\",0", exe_path))?;
 
-        // 创建 command 子键来存储实际执行的命令
+        // Create the command subkey to store the actual command to execute
         let (command_key, _) = sub_command_entry_key.create_subkey("command")?;
         let command_str = sc_info.arg_template.replace("{}", exe_path);
-        command_key.set_value("", &command_str)?; // 命令字符串作为 command 键的默认值
+        command_key.set_value("", &command_str)?; // Command string as the default value of the command key
     }
 
     Ok(())
 }
 
-/// 移除右键菜单项。
+/// Removes context menu entries.
 pub fn remove_context_menu_entries() -> Result<()> {
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
 
     if let Ok(classes_key) = hkcu.open_subkey_with_flags("Software\\Classes", KEY_WRITE) {
-        // 由于所有子命令都在主菜单项之下，只需递归删除主菜单项即可
+        // Since all subcommands are under the main menu item, simply recursively delete the main menu item
         let paths_to_delete = [FILE_SHELL_PATH, DIRECTORY_SHELL_PATH, FOLDER_SHELL_PATH];
         for path_prefix in paths_to_delete.iter() {
             let _ = classes_key.delete_subkey_all(format!("{}\\{}", path_prefix, MENU_NAME));
         }
     }
 
-    println!("成功移除右键菜单项");
+    println!("Successfully removed context menu entries");
     Ok(())
 }

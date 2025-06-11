@@ -1,26 +1,26 @@
 use rfd::FileDialog;
 use std::path::PathBuf;
 
-/// 使用 Windows API 打开一个文件选择窗，用户可以选择一个文件。
+/// Opens a file selection dialog using the Windows API, allowing the user to choose a file.
 ///
-/// # 参数
+/// # Arguments
 ///
-/// * `extensions`: 一个字符串切片，包含允许的文件后缀名 (例如, &["txt", "doc"])。如果为空，则不进行后缀过滤。
+/// * `extensions`: A slice of strings containing allowed file extensions (e.g., &["txt", "doc"]). If empty, no extension filtering is applied.
 ///
-/// # 返回
+/// # Returns
 ///
-/// * `Option<PathBuf>`: 如果用户选择了一个文件，则返回 `Some(PathBuf)` 包含文件路径；如果用户取消了选择，则返回 `None`。
+/// * `Option<PathBuf>`: Returns `Some(PathBuf)` with the file path if the user selected a file; returns `None` if the user cancelled the selection.
 #[allow(unused)]
 pub fn open_file_dialog(extensions: &[&str]) -> Option<PathBuf> {
     let mut dialog = FileDialog::new();
 
     if !extensions.is_empty() {
-        // 构建过滤器名称，例如 "Text and Word files"
+        // Build filter name, e.g., "Text and Word files"
         let filter_name = if extensions.len() == 1 {
-            format!("{} 文件", extensions[0].to_uppercase())
+            format!("{} Files", extensions[0].to_uppercase())
         } else {
             let exts_joined = extensions.join(", ");
-            format!("{} 文件", exts_joined)
+            format!("{} Files", exts_joined)
         };
         dialog = dialog.add_filter(&filter_name, extensions);
     }
@@ -28,38 +28,38 @@ pub fn open_file_dialog(extensions: &[&str]) -> Option<PathBuf> {
     dialog.pick_file()
 }
 
-/// 使用 Windows API 打开一个“另存为”文件对话框，用户可以选择保存文件的位置和名称。
+/// Opens a "Save As" file dialog using the Windows API, allowing the user to choose the location and name for saving a file.
 ///
-/// # 参数
+/// # Arguments
 ///
-/// * `extensions`: 一个字符串切片，包含允许的文件后缀名 (例如, &["txt", "doc"])。如果为空，则不进行后缀过滤。对话框通常会自动附加所选的后缀。
-/// * `default_filename`: 一个字符串切片，表示默认显示在文件名输入框中的名称。
+/// * `extensions`: A slice of strings containing allowed file extensions (e.g., &["txt", "doc"]). If empty, no extension filtering is applied. The dialog usually automatically appends the selected extension.
+/// * `default_filename`: A string slice representing the default name displayed in the filename input box.
 ///
-/// # 返回
+/// # Returns
 ///
-/// * `Option<PathBuf>`: 如果用户确认了保存位置和文件名，则返回 `Some(PathBuf)` 包含完整路径；如果用户取消了操作，则返回 `None`。
+/// * `Option<PathBuf>`: Returns `Some(PathBuf)` with the full path if the user confirmed the save location and filename; returns `None` if the user cancelled the operation.
 pub fn save_file_dialog(extensions: &[&str], default_filename: &str) -> Option<PathBuf> {
     let mut dialog = FileDialog::new();
 
     if !extensions.is_empty() {
-        // 为 "另存为" 对话框创建过滤器描述
-        // 通常，用户选择一个过滤器后，对话框会自动处理后缀的添加
+        // Create filter description for "Save As" dialog
+        // Typically, after the user selects a filter, the dialog automatically handles appending the extension
         let filter_name = if extensions.len() == 1 {
             format!(
-                "{} 文件 (*.{})",
+                "{} Files (*.{})",
                 extensions[0].to_uppercase(),
                 extensions[0]
             )
         } else {
-            // 对于多个后缀，可以创建一个更通用的描述
-            // 或者为每个后缀创建单独的过滤器条目，rfd 支持多个 add_filter 调用
+            // For multiple extensions, a more general description can be created
+            // Or separate filter entries can be created for each extension, rfd supports multiple add_filter calls
             let exts_display = extensions
                 .iter()
                 .map(|e| format!("*.{}", e))
                 .collect::<Vec<String>>()
                 .join(";");
             let exts_joined = extensions.join(", ");
-            format!("{} 文件 ({})", exts_joined.to_uppercase(), exts_display)
+            format!("{} Files ({})", exts_joined.to_uppercase(), exts_display)
         };
         dialog = dialog.add_filter(&filter_name, extensions);
     }

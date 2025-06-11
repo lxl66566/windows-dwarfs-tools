@@ -17,32 +17,32 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// 卸载右键菜单项
+    /// Uninstall context menu entries
     Uninstall,
-    /// 压缩文件或文件夹
+    /// Compress file or folder
     #[command(visible_alias = "c")]
     Compress {
-        /// 输入文件或文件夹路径
+        /// Input file or folder path
         input: PathBuf,
-        /// 输出文件路径 (可选)。如果未提供，则自动生成。
+        /// Output file path (optional). If not provided, it will be generated automatically.
         #[arg(short, long)]
         output: Option<PathBuf>,
-        /// 压缩级别 (0-9, 默认 7)
+        /// Compression level (0-9, default 7)
         #[arg(short, long, value_parser = clap::value_parser!(i32).range(0..=9))]
         compression_level: Option<i32>,
-        /// 交互式选择文件/文件夹将被压缩到的位置
+        /// Interactively select where the file/folder will be compressed to
         #[arg(short, long)]
         interactive: bool,
     },
-    /// 解压文件或文件夹
+    /// Decompress file or folder
     #[command(visible_alias = "d")]
     Decompress {
-        /// 输入文件路径
+        /// Input file path
         input: PathBuf,
-        /// 输出文件或文件夹路径 (可选)。如果未提供，则自动生成。
+        /// Output file or folder path (optional). If not provided, it will be generated automatically.
         #[arg(short, long)]
         output: Option<PathBuf>,
-        /// 交互式选择解压文件将要保存到的位置
+        /// Interactively select where the decompressed file will be saved
         #[arg(short, long)]
         interactive: bool,
     },
@@ -52,9 +52,9 @@ struct PauseGuard;
 
 impl Drop for PauseGuard {
     fn drop(&mut self) {
-        // 这个方法会在 PauseGuard 实例离开作用域时调用
-        // 无论是因为正常结束还是因为 panic
-        println!("请按任意键继续");
+        // This method is called when the PauseGuard instance goes out of scope
+        // whether due to normal completion or a panic
+        println!("Press any key to continue...");
         std::io::stdin().read_exact(&mut [0; 1]).unwrap();
     }
 }
@@ -103,7 +103,7 @@ fn run(cli: Cli) -> Result<()> {
                         .file_name()
                         .expect("Internal error: Failed to get file name from path that will be compress to").to_string_lossy().as_ref(),
                 );
-                assert!(output.is_some(), "用户取消了文件选择操作");
+                assert!(output.is_some(), "User cancelled file selection operation");
             }
             compress_folder_to_dwarfs(
                 input.clone(),
@@ -120,13 +120,13 @@ fn run(cli: Cli) -> Result<()> {
                 output = file_dialog::save_file_dialog(&[], input.clone().rm_ext()
                         .file_name()
                         .expect("Internal error: Failed to get file name from path that will be decompress to").to_string_lossy().as_ref(),);
-                assert!(output.is_some(), "用户取消了文件选择操作");
-                println!("解压到 {:?}", output.as_ref().unwrap());
+                assert!(output.is_some(), "User cancelled file selection operation");
+                println!("Decompressing to {:?}", output.as_ref().unwrap());
             }
             decompress_dwarfs_to_folder(input.clone(), output.unwrap_or_else(|| input.rm_ext()))?;
         }
         None => {
-            // 不带参数执行时，添加右键菜单项
+            // When executed without arguments, add context menu entries
             edit_reg::add_context_menu_entries()?;
         }
     }

@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 #[once]
-fn temp_dir() -> PathBuf {
+pub fn temp_dir() -> PathBuf {
     let path = env::temp_dir().join(env!("CARGO_PKG_NAME"));
     fs::create_dir_all(&path).expect("create temp dir failed");
     path
@@ -25,7 +25,7 @@ macro_rules! write_prebuilt_zstd {
     }};
 }
 
-fn unpack_all() -> Result<()> {
+pub fn unpack_all() -> Result<()> {
     let path1 = temp_dir().join("dwarfs.exe");
     let path2 = temp_dir().join("winfsp-x64.dll");
     let path3 = temp_dir().join("mkdwarfs.exe");

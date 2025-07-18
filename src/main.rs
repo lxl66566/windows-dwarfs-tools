@@ -1,6 +1,7 @@
 mod compress;
 mod edit_reg;
 mod file_dialog;
+mod mount;
 use anyhow::Result;
 use assert2::assert;
 use clap::{Parser, Subcommand};
@@ -45,6 +46,14 @@ enum Commands {
         /// Interactively select where the decompressed file will be saved
         #[arg(short, long)]
         interactive: bool,
+    },
+    /// Mount dwarfs file as drive or folder
+    #[command(visible_alias = "m")]
+    Mount {
+        /// Input file path
+        input: PathBuf,
+        /// Output drive letter (ends with ':') or folder path (optional). If not provided, it will be a usable drive letter.
+        dest: Option<String>,
     },
 }
 
@@ -128,6 +137,9 @@ fn run(cli: Cli) -> Result<()> {
         None => {
             // When executed without arguments, add context menu entries
             edit_reg::add_context_menu_entries()?;
+        }
+        Some(Commands::Mount { input, dest }) => {
+            mount::mount_dwarfs(input, dest)?;
         }
     }
 

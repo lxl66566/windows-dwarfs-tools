@@ -15,7 +15,7 @@ struct SubCommandInfo<'a> {
 }
 
 // Subcommand list
-const SUB_COMMANDS: [SubCommandInfo; 4] = [
+const SUB_COMMANDS: [SubCommandInfo; 5] = [
     SubCommandInfo {
         key_name: "CompressQuick",
         display_name: "Quick Compress",
@@ -35,6 +35,11 @@ const SUB_COMMANDS: [SubCommandInfo; 4] = [
         key_name: "DecompressTo",
         display_name: "Decompress to...",
         arg_template: "\"{}\" d -i \"%1\"",
+    },
+    SubCommandInfo {
+        key_name: "Mount",
+        display_name: "Mount",
+        arg_template: "\"{}\" m \"%1\"",
     },
 ];
 

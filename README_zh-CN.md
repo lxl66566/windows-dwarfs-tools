@@ -2,14 +2,15 @@
 
 [English](README.md) | 简体中文
 
-一个致力于让 Windows 用户更便捷地使用 [dwarfs](https://github.com/mhx/dwarfs) 进行压缩和解压的工具。它通过为 Windows 系统添加右键菜单项，使用户能够直接通过右键点击文件夹执行基于 zstd/lzma 的 dwarfs 格式压缩和解压操作。
+一个致力于让 Windows 用户更便捷地使用 [dwarfs](https://github.com/mhx/dwarfs) 进行压缩和解压的工具。它通过为 Windows 系统添加右键菜单项，使用户能够直接通过右键点击文件/文件夹执行基于 zstd/lzma 的 dwarfs 格式压缩、解压、挂载操作。
 
-windows-dwarfs-tools 内置了 64 位的 dwarfs 可执行文件和 winfsp dll，可以在 Windows 系统上直接使用，免去了安装依赖项的麻烦。
+windows-dwarfs-tools 内置了 64 位的 dwarfs 可执行文件和 winfsp dll，可以在 Windows 系统上直接使用，免去了安装依赖项的麻烦。当然，如果需要挂载 dwarfs 文件，需要安装 WinFsp。
 
 ## 主要特点
 
 - **高效压缩**: 利用 dwarfs 进行高压缩率的存档，兼顾性能和压缩率。
 - **右键菜单集成**: 轻松通过右键菜单进行压缩和解压。
+- **可挂载**: 可以将 dwarfs 文件挂载为盘符或文件夹，易于使用。
 
 ## 安装
 
@@ -22,7 +23,6 @@ windows-dwarfs-tools 内置了 64 位的 dwarfs 可执行文件和 winfsp dll，
 
 ## 提示
 
-- dwarfs 仅能压缩文件夹，不支持压缩单个文件。
 - 除了右键菜单，本项目也提供了命令行接口。请运行 `windows-dwarfs-tools -h` 查看帮助信息。
   - 卸载该菜单需要运行命令行。
 

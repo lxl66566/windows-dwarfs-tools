@@ -7,7 +7,7 @@ use assert2::assert;
 use clap::{Parser, Subcommand};
 use std::{ffi::OsString, io::Read, path::PathBuf};
 
-use crate::compress::{compress_folder_to_dwarfs, decompress_dwarfs_to_folder};
+use crate::compress::{compress_path_to_dwarfs, decompress_dwarfs_to_folder};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -114,7 +114,7 @@ fn run(cli: Cli) -> Result<()> {
                 );
                 assert!(output.is_some(), "User cancelled file selection operation");
             }
-            compress_folder_to_dwarfs(
+            compress_path_to_dwarfs(
                 input.clone(),
                 output.unwrap_or_else(|| input.add_ext()),
                 compression_level,
@@ -130,7 +130,6 @@ fn run(cli: Cli) -> Result<()> {
                         .file_name()
                         .expect("Internal error: Failed to get file name from path that will be decompress to").to_string_lossy().as_ref(),);
                 assert!(output.is_some(), "User cancelled file selection operation");
-                println!("Decompressing to {:?}", output.as_ref().unwrap());
             }
             decompress_dwarfs_to_folder(input.clone(), output.unwrap_or_else(|| input.rm_ext()))?;
         }

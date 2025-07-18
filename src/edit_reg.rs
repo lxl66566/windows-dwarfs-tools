@@ -3,7 +3,7 @@ use std::env;
 use winreg::{RegKey, enums::*};
 
 const MENU_NAME: &str = env!("CARGO_PKG_NAME"); // Main menu item name
-const FILE_SHELL_PATH: &str = ".dwarfs\\shell"; // Applies to files
+const FILE_SHELL_PATH: &str = "*\\shell"; // Applies to all files
 const DIRECTORY_SHELL_PATH: &str = "Directory\\shell"; // Applies to folders themselves and folder background
 const FOLDER_SHELL_PATH: &str = "Folder\\shell"; // Primarily applies to folder items themselves
 

@@ -1,30 +1,30 @@
 # windows-dwarfs-tools
 
-English | [简体中文](README_zh-CN.md)
+[English](README.md) | 简体中文
 
-A tool dedicated to making it easier for Windows users to compress and decompress files using [dwarfs](https://github.com/mhx/dwarfs). It adds right-click menu options to Windows, allowing users to directly perform zstd/lzma based dwarfs compression and decompression operations by right-clicking on files or folders.
+A tool dedicated to making it more convenient for Windows users to use [dwarfs](https://github.com/mhx/dwarfs) for compression and decompression. It adds a right-click context menu item to the Windows system, allowing users to directly perform zstd/lzma-based dwarfs format compression, decompression, and mounting operations by right-clicking on files/folders.
 
-windows-dwarfs-tools comes with a built-in 64-bit dwarfs executable and winfsp dll, making it ready to use on Windows systems without the hassle of installing dependencies.
+windows-dwarfs-tools has built-in 64-bit dwarfs executables and a winfsp dll, allowing it to be used directly on Windows systems without the hassle of installing dependencies. Of course, if you need to mount dwarfs files, you will need to install WinFsp.
 
-## Key Features
+## Main Features
 
-- **Efficient Compression**: Utilizes dwarfs for high-compression archiving, balancing performance and compression ratio.
-- **Right-Click Menu Integration**: Easily compress and decompress via the right-click context menu.
+- **Efficient Compression**: Utilizes dwarfs for high-compression ratio archiving, balancing performance and compression ratio.
+- **Right-Click Menu Integration**: Easily perform compression and decompression through the right-click context menu.
+- **Mountable**: Dwarfs files can be mounted as a drive letter or a folder, making them easy to use.
 
 ## Installation
 
 Choose one of the following:
 
-- Download the executable from [Release](https://github.com/lxl66566/windows-dwarfs-tools/releases) and place it in `C:\Windows\System32` or any directory included in your `PATH`.
+- Download the executable file from the [Release](https://github.com/lxl66566/windows-dwarfs-tools/releases) page and place it in `C:\Windows\System32` or any directory included in your `PATH`.
 - Install using [bpm](https://github.com/lxl66566/bpm): `bpm i lxl66566/windows-dwarfs-tools`.
 
-After installation, simply run the exe or run it from the command line without arguments to add the right-click menu entries.
+After installation, simply click the exe to run it or run it from the command line without any arguments to add the right-click context menu item.
 
-## Tips
+## Notes
 
-- dwarfs can only compress folders, not individual files.
-- In addition to the right-click menu, this project also provides a command-line interface. Please run `windows-dwarfs-tools -h` for help information.
-  - Uninstalling the menu requires running the command line.
+- In addition to the right-click menu, this project also provides a command-line interface. Please run `windows-dwarfs-tools -h` to view the help information.
+  - Uninstalling the menu requires running a command line.
 
 For explanations of compression levels, please refer to the dwarfs documentation:
 

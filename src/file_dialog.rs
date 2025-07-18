@@ -20,7 +20,7 @@ pub fn open_file_dialog(extensions: &[&str]) -> Option<PathBuf> {
             format!("{} Files", extensions[0].to_uppercase())
         } else {
             let exts_joined = extensions.join(", ");
-            format!("{} Files", exts_joined)
+            format!("{exts_joined} Files")
         };
         dialog = dialog.add_filter(&filter_name, extensions);
     }
@@ -55,7 +55,7 @@ pub fn save_file_dialog(extensions: &[&str], default_filename: &str) -> Option<P
             // Or separate filter entries can be created for each extension, rfd supports multiple add_filter calls
             let exts_display = extensions
                 .iter()
-                .map(|e| format!("*.{}", e))
+                .map(|e| format!("*.{e}"))
                 .collect::<Vec<String>>()
                 .join(";");
             let exts_joined = extensions.join(", ");

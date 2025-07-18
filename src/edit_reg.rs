@@ -71,12 +71,12 @@ fn add_menu_for_shell_path_prefix(
 ) -> Result<()> {
     // 1. Create the main menu item key, e.g., HKCU\Software\Classes\*\shell\Zstd Tool
     let (main_menu_key, _) =
-        classes_key.create_subkey(format!("{}\\{}", shell_path_prefix, MENU_NAME))?;
+        classes_key.create_subkey(format!("{shell_path_prefix}\\{MENU_NAME}"))?;
 
     // Set the display name for the main menu
     main_menu_key.set_value("MUIVerb", &MENU_NAME)?;
     // (Optional) Set an icon for the main menu, pointing to your program and icon index (0 is usually the first)
-    main_menu_key.set_value("Icon", &format!("\"{}\",0", exe_path))?;
+    main_menu_key.set_value("Icon", &format!("\"{exe_path}\",0"))?;
 
     // (Optional but recommended) Set SubCommands to an empty string to explicitly indicate this is a menu with subcommands.
     // Even if subcommands are defined directly under its "shell" subkey.
@@ -113,7 +113,7 @@ pub fn remove_context_menu_entries() -> Result<()> {
         // Since all subcommands are under the main menu item, simply recursively delete the main menu item
         let paths_to_delete = [FILE_SHELL_PATH, DIRECTORY_SHELL_PATH, FOLDER_SHELL_PATH];
         for path_prefix in paths_to_delete.iter() {
-            let _ = classes_key.delete_subkey_all(format!("{}\\{}", path_prefix, MENU_NAME));
+            let _ = classes_key.delete_subkey_all(format!("{path_prefix}\\{MENU_NAME}"));
         }
     }
 

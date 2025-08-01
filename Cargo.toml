@@ -9,7 +9,7 @@ assert2 = "0.3.15"
 clap    = { version = "4.5", features = ["derive"] }
 once-fn = "0.2.0"
 rfd     = "0.15"
-windows = { version = "0.58.0", features = ["Win32_Storage_FileSystem"] }
+windows = { version = "0.61.3", features = ["Win32_Storage_FileSystem"] }
 winreg  = "0.55"
 zstd    = "0.13"
 

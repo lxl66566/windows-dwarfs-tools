@@ -1,6 +1,6 @@
 # windows-dwarfs-tools
 
-[English](README.md) | 简体中文
+English | [简体中文](./README_zh-CN.md)
 
 A tool dedicated to making it more convenient for Windows users to use [dwarfs](https://github.com/mhx/dwarfs) for compression and decompression. It adds a right-click context menu item to the Windows system, allowing users to directly perform zstd/lzma-based dwarfs format compression, decompression, and mounting operations by right-clicking on files/folders.
 

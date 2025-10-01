@@ -876,9 +876,9 @@ dependencies = [
 
 [[package]]
 name = "once-fn"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "342acec9afc4727b3ff269704413b9be62df1c968694145cb6b81dc4da06c005"
+checksum = "cc3537c49574aefd7911d17ccf83d82a3c9642242b844c1641521d964fcc1d5a"
 dependencies = [
  "heck",
  "proc-macro2",

@@ -1,5 +1,6 @@
-use anyhow::{Result, anyhow};
 use std::env;
+
+use anyhow::{Result, anyhow};
 use winreg::{RegKey, enums::*};
 
 const MENU_NAME: &str = env!("CARGO_PKG_NAME"); // Main menu item name
@@ -45,7 +46,8 @@ const SUB_COMMANDS: [SubCommandInfo; 5] = [
 
 /// Adds context menu entries.
 ///
-/// Adds an expandable context menu for files and folders, with subcommands defined directly under the main menu's shell subkey.
+/// Adds an expandable context menu for files and folders, with subcommands defined directly under
+/// the main menu's shell subkey.
 pub fn add_context_menu_entries() -> Result<()> {
     let current_exe = env::current_exe()?;
     let exe_path = current_exe
@@ -68,7 +70,8 @@ pub fn add_context_menu_entries() -> Result<()> {
     Ok(())
 }
 
-/// Adds the main menu and all its submenu items for the specified shell path prefix (e.g., "*\\shell").
+/// Adds the main menu and all its submenu items for the specified shell path prefix (e.g.,
+/// "*\\shell").
 fn add_menu_for_shell_path_prefix(
     classes_key: &RegKey,    // HKCU\Software\Classes
     shell_path_prefix: &str, // E.g., "*\\shell", "Directory\\shell"
@@ -80,11 +83,13 @@ fn add_menu_for_shell_path_prefix(
 
     // Set the display name for the main menu
     main_menu_key.set_value("MUIVerb", &MENU_NAME)?;
-    // (Optional) Set an icon for the main menu, pointing to your program and icon index (0 is usually the first)
+    // (Optional) Set an icon for the main menu, pointing to your program and icon index (0 is
+    // usually the first)
     main_menu_key.set_value("Icon", &format!("\"{exe_path}\",0"))?;
 
-    // (Optional but recommended) Set SubCommands to an empty string to explicitly indicate this is a menu with subcommands.
-    // Even if subcommands are defined directly under its "shell" subkey.
+    // (Optional but recommended) Set SubCommands to an empty string to explicitly indicate this is
+    // a menu with subcommands. Even if subcommands are defined directly under its "shell"
+    // subkey.
     main_menu_key.set_value("SubCommands", &"")?;
 
     // 2. Create a "shell" subkey under the main menu item to hold all subcommand items
@@ -92,8 +97,9 @@ fn add_menu_for_shell_path_prefix(
     let (sub_menu_container_key, _) = main_menu_key.create_subkey("shell")?;
 
     // 3. Add each subcommand item under this "shell" subkey
-    for sc_info in SUB_COMMANDS.iter() {
-        // Create the subcommand item key, e.g., HKCU\Software\Classes\*\shell\Zstd Tool\shell\CompressQuick
+    for sc_info in &SUB_COMMANDS {
+        // Create the subcommand item key, e.g., HKCU\Software\Classes\*\shell\Zstd
+        // Tool\shell\CompressQuick
         let (sub_command_entry_key, _) = sub_menu_container_key.create_subkey(sc_info.key_name)?;
 
         // Set the display name for the subcommand item
@@ -115,9 +121,10 @@ pub fn remove_context_menu_entries() -> Result<()> {
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
 
     if let Ok(classes_key) = hkcu.open_subkey_with_flags("Software\\Classes", KEY_WRITE) {
-        // Since all subcommands are under the main menu item, simply recursively delete the main menu item
+        // Since all subcommands are under the main menu item, simply recursively delete the main
+        // menu item
         let paths_to_delete = [FILE_SHELL_PATH, DIRECTORY_SHELL_PATH, FOLDER_SHELL_PATH];
-        for path_prefix in paths_to_delete.iter() {
+        for path_prefix in &paths_to_delete {
             let _ = classes_key.delete_subkey_all(format!("{path_prefix}\\{MENU_NAME}"));
         }
     }

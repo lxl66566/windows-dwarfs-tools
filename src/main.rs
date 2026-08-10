@@ -2,10 +2,11 @@ mod compress;
 mod edit_reg;
 mod file_dialog;
 mod mount;
+use std::{ffi::OsString, io::Read, path::PathBuf};
+
 use anyhow::Result;
 use assert2::assert;
 use clap::{Parser, Subcommand};
-use std::{ffi::OsString, io::Read, path::PathBuf};
 
 use crate::compress::{compress_path_to_dwarfs, decompress_dwarfs_to_folder};
 
@@ -40,7 +41,8 @@ enum Commands {
     Decompress {
         /// Input file path
         input: PathBuf,
-        /// Output file or folder path (optional). If not provided, it will be generated automatically.
+        /// Output file or folder path (optional). If not provided, it will be generated
+        /// automatically.
         #[arg(short, long)]
         output: Option<PathBuf>,
         /// Interactively select where the decompressed file will be saved
@@ -52,7 +54,8 @@ enum Commands {
     Mount {
         /// Input file path
         input: PathBuf,
-        /// Output drive letter (ends with ':') or folder path (optional). If not provided, it will be a usable drive letter.
+        /// Output drive letter (ends with ':') or folder path (optional). If not provided, it will
+        /// be a usable drive letter.
         dest: Option<String>,
     },
 }
@@ -98,7 +101,7 @@ fn run(cli: Cli) -> Result<()> {
     match cli.command {
         Some(Commands::Uninstall) => {
             edit_reg::remove_context_menu_entries()?;
-        }
+        },
         Some(Commands::Compress {
             input,
             mut output,
@@ -108,9 +111,16 @@ fn run(cli: Cli) -> Result<()> {
             if interactive {
                 output = file_dialog::save_file_dialog(
                     &["*.dwarfs"],
-                    input.clone().add_ext()
+                    input
+                        .clone()
+                        .add_ext()
                         .file_name()
-                        .expect("Internal error: Failed to get file name from path that will be compress to").to_string_lossy().as_ref(),
+                        .expect(
+                            "Internal error: Failed to get file name from path that will be \
+                             compress to",
+                        )
+                        .to_string_lossy()
+                        .as_ref(),
                 );
                 assert!(output.is_some(), "User cancelled file selection operation");
             }
@@ -119,27 +129,37 @@ fn run(cli: Cli) -> Result<()> {
                 output.unwrap_or_else(|| input.add_ext()),
                 compression_level,
             )?;
-        }
+        },
         Some(Commands::Decompress {
             input,
             mut output,
             interactive,
         }) => {
             if interactive {
-                output = file_dialog::save_file_dialog(&[], input.clone().rm_ext()
+                output = file_dialog::save_file_dialog(
+                    &[],
+                    input
+                        .clone()
+                        .rm_ext()
                         .file_name()
-                        .expect("Internal error: Failed to get file name from path that will be decompress to").to_string_lossy().as_ref(),);
+                        .expect(
+                            "Internal error: Failed to get file name from path that will be \
+                             decompress to",
+                        )
+                        .to_string_lossy()
+                        .as_ref(),
+                );
                 assert!(output.is_some(), "User cancelled file selection operation");
             }
             decompress_dwarfs_to_folder(input.clone(), output.unwrap_or_else(|| input.rm_ext()))?;
-        }
+        },
         None => {
             // When executed without arguments, add context menu entries
             edit_reg::add_context_menu_entries()?;
-        }
+        },
         Some(Commands::Mount { input, dest }) => {
             mount::mount_dwarfs(input, dest)?;
-        }
+        },
     }
 
     Ok(())

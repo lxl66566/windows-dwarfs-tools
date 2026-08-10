@@ -1,10 +1,12 @@
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+    process::Command,
+};
+
 use anyhow::Result;
 use assert2::assert;
 use once_fn::once;
-use std::env;
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::process::Command;
 
 #[once]
 pub fn temp_dir() -> PathBuf {
@@ -107,7 +109,7 @@ pub fn compress_path_to_dwarfs<P: AsRef<Path>>(
         fs::rename(input_path_ref, &dest_path)?;
         // dbg!(&input_path_ref, &temp_folder_path, &dest_path);
         compress_folder_to_dwarfs(
-            temp_folder_path.to_path_buf(),
+            temp_folder_path.clone(),
             output_path_ref.to_path_buf(),
             compression_level,
         )?;

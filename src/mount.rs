@@ -1,7 +1,8 @@
-use crate::compress::{temp_dir, unpack_all};
 use std::process::Command;
 
 use windows::Win32::Storage::FileSystem::GetLogicalDrives;
+
+use crate::compress::{temp_dir, unpack_all};
 
 /// 获取从 Z: 到 A: 的首个未使用的盘符。
 ///

@@ -1,7 +1,12 @@
 [package]
-name    = "windows-dwarfs-tools"
-version = "0.3.1"
-edition = "2024"
+name        = "windows-dwarfs-tools"
+version     = "0.3.0"
+edition     = "2024"
+description = "Windows tool for compressing folder and mounting dwarfs archives easily"
+repository  = "https://github.com/lxl66566/windows-dwarfs-tools"
+license     = "MIT OR Apache-2.0"
+keywords    = ["compression", "dwarfs", "mount", "windows"]
+categories  = ["command-line-utilities", "compression"]
 
 [dependencies]
 anyhow  = "1"
@@ -33,7 +38,7 @@ unsafe_code           = "allow"
 unused_qualifications = "warn"
 
 [profile.release]
-opt-level = "z"
+opt-level = "s"
 strip     = true
-lto       = "fat"
+lto       = true
 panic     = "abort"

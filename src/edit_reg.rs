@@ -117,7 +117,7 @@ fn add_menu_for_shell_path_prefix(
 }
 
 /// Removes context menu entries.
-pub fn remove_context_menu_entries() -> Result<()> {
+pub fn remove_context_menu_entries() {
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
 
     if let Ok(classes_key) = hkcu.open_subkey_with_flags("Software\\Classes", KEY_WRITE) {
@@ -130,5 +130,4 @@ pub fn remove_context_menu_entries() -> Result<()> {
     }
 
     println!("Successfully removed context menu entries");
-    Ok(())
 }

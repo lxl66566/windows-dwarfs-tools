@@ -71,7 +71,11 @@ pub fn compress_folder_to_dwarfs<P: AsRef<Path>>(
 pub fn decompress_dwarfs_to_folder<P: AsRef<Path>>(input_path: P, output_path: P) -> Result<()> {
     let input_path = input_path.as_ref();
     let output_path = output_path.as_ref();
-    println!("Decompressing  {input_path:?} to {output_path:?}");
+    println!(
+        "Decompressing  {} to {}",
+        input_path.display(),
+        output_path.display()
+    );
     unpack_all()?;
     assert!(input_path.is_file());
     fs::create_dir_all(output_path)?;
@@ -101,7 +105,7 @@ pub fn compress_path_to_dwarfs<P: AsRef<Path>>(
             .unwrap_or("temp_file");
         let temp_folder_path = input_path_ref
             .parent()
-            .unwrap_or_else(|| panic!("can't get parent path of {input_path_ref:?}"))
+            .unwrap_or_else(|| panic!("can't get parent path of {}", input_path_ref.display()))
             .join(file_name);
         fs::create_dir_all(&temp_folder_path)?;
         let dest_path =
@@ -122,9 +126,9 @@ pub fn compress_path_to_dwarfs<P: AsRef<Path>>(
             compression_level,
         )?;
     } else if input_path_ref.exists() {
-        panic!("Unsupported input path type: {input_path_ref:?}");
+        panic!("Unsupported input path type: {}", input_path_ref.display());
     } else {
-        panic!("Input path does not exist: {input_path_ref:?}");
+        panic!("Input path does not exist: {}", input_path_ref.display());
     }
     Ok(())
 }

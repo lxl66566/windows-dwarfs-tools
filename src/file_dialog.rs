@@ -6,7 +6,7 @@ use rfd::FileDialog;
 ///
 /// # Arguments
 ///
-/// * `extensions`: A slice of strings containing allowed file extensions (e.g., &["txt", "doc"]).
+/// * `extensions`: A slice of strings containing allowed file extensions (e.g., `&["txt", "doc"]`).
 ///   If empty, no extension filtering is applied.
 ///
 /// # Returns
@@ -36,7 +36,7 @@ pub fn open_file_dialog(extensions: &[&str]) -> Option<PathBuf> {
 ///
 /// # Arguments
 ///
-/// * `extensions`: A slice of strings containing allowed file extensions (e.g., &["txt", "doc"]).
+/// * `extensions`: A slice of strings containing allowed file extensions (e.g., `&["txt", "doc"]`).
 ///   If empty, no extension filtering is applied. The dialog usually automatically appends the
 ///   selected extension.
 /// * `default_filename`: A string slice representing the default name displayed in the filename

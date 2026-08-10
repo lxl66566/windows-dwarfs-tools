@@ -28,7 +28,7 @@ pub fn mount_dwarfs(input: std::path::PathBuf, dest: Option<String>) -> anyhow::
     unpack_all()?;
     let dest =
         dest.unwrap_or_else(|| get_first_unused_drive_letter().expect("No available drive letter"));
-    println!("Mount {input:?} to `{dest}`");
+    println!("Mount {} to `{dest}`", input.display());
     let mut cmd = Command::new(temp_dir().join("dwarfs.exe"));
     let child = cmd.arg(input).arg(dest).output()?;
     if !child.status.success() {

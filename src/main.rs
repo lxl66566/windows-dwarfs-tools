@@ -5,7 +5,6 @@ mod mount;
 use std::{io::Read, path::{Path, PathBuf}};
 
 use anyhow::Result;
-use assert2::assert;
 use clap::{Parser, Subcommand};
 
 use crate::compress::{compress_path_to_dwarfs, decompress_dwarfs_to_folder};
@@ -112,7 +111,7 @@ fn run(cli: Cli) -> Result<()> {
         }) => {
             if interactive {
                 let default_output = input.add_ext();
-                output = file_dialog::save_file_dialog(
+                let Some(selected) = file_dialog::save_file_dialog(
                     &["*.dwarfs"],
                     default_output
                         .file_name()
@@ -122,8 +121,11 @@ fn run(cli: Cli) -> Result<()> {
                         )
                         .to_string_lossy()
                         .as_ref(),
-                );
-                assert!(output.is_some(), "User cancelled file selection operation");
+                ) else {
+                    println!("Operation cancelled by user");
+                    return Ok(());
+                };
+                output = Some(selected);
             }
             compress_path_to_dwarfs(
                 &input,
@@ -138,7 +140,7 @@ fn run(cli: Cli) -> Result<()> {
         }) => {
             if interactive {
                 let default_output = input.rm_ext();
-                output = file_dialog::save_file_dialog(
+                let Some(selected) = file_dialog::save_file_dialog(
                     &[],
                     default_output
                         .file_name()
@@ -148,8 +150,11 @@ fn run(cli: Cli) -> Result<()> {
                         )
                         .to_string_lossy()
                         .as_ref(),
-                );
-                assert!(output.is_some(), "User cancelled file selection operation");
+                ) else {
+                    println!("Operation cancelled by user");
+                    return Ok(());
+                };
+                output = Some(selected);
             }
             decompress_dwarfs_to_folder(&input, output.unwrap_or_else(|| input.rm_ext()))?;
         },

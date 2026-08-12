@@ -112,7 +112,7 @@ fn run(cli: Cli) -> Result<()> {
             if interactive {
                 let default_output = input.add_ext();
                 let Some(selected) = file_dialog::save_file_dialog(
-                    &["*.dwarfs"],
+                    &["dwarfs"],
                     default_output
                         .file_name()
                         .expect(

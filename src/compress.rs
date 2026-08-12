@@ -1,5 +1,6 @@
 use std::{
     env, fs,
+    io::{self, Cursor},
     path::{Path, PathBuf},
     process::Command,
 };
@@ -7,6 +8,7 @@ use std::{
 use anyhow::Result;
 use assert2::assert;
 use once_fn::once;
+use tempfile::NamedTempFile;
 
 #[once]
 pub fn temp_dir() -> PathBuf {
@@ -15,16 +17,14 @@ pub fn temp_dir() -> PathBuf {
     path
 }
 
-/// decompress the prebuilt zst file and write to a temp file.
-macro_rules! write_prebuilt_zstd {
-    ($zst_filename:expr, $output_path:expr) => {{
-        let compressed_bytes = include_bytes!(concat!(env!("OUT_DIR"), "/", $zst_filename));
-        let file = std::fs::File::create(&$output_path).expect("create temp file failed");
-        let mut decoder = zstd::stream::Decoder::new(std::io::Cursor::new(compressed_bytes))
-            .expect("zstd decoder create failed");
-        let mut writer = std::io::BufWriter::new(file);
-        std::io::copy(&mut decoder, &mut writer).map(|_| $output_path)
-    }};
+/// Decompress prebuilt zst bytes and atomically persist to `target`,
+/// so a killed process never leaves a partially written binary behind.
+fn unpack_zstd_to(compressed: &[u8], target: &Path) -> Result<()> {
+    let mut tmp_file = NamedTempFile::new_in(temp_dir())?;
+    let mut decoder = zstd::stream::Decoder::new(Cursor::new(compressed))?;
+    io::copy(&mut decoder, &mut tmp_file)?;
+    tmp_file.persist(target).map_err(|e| e.error)?;
+    Ok(())
 }
 
 pub fn unpack_all() -> Result<()> {
@@ -33,10 +33,13 @@ pub fn unpack_all() -> Result<()> {
     let path3 = temp_dir().join("mkdwarfs.exe");
     let path4 = temp_dir().join("dwarfsextract.exe");
     if !path1.exists() {
-        write_prebuilt_zstd!("dwarfs.exe.zst", &path1)?;
+        unpack_zstd_to(include_bytes!(concat!(env!("OUT_DIR"), "/dwarfs.exe.zst")), &path1)?;
     }
     if !path2.exists() {
-        write_prebuilt_zstd!("winfsp-x64.dll.zst", path2)?;
+        unpack_zstd_to(
+            include_bytes!(concat!(env!("OUT_DIR"), "/winfsp-x64.dll.zst")),
+            &path2,
+        )?;
     }
     if !path3.exists() {
         fs::hard_link(&path1, path3)?;

@@ -179,22 +179,22 @@ mod tests {
 
     #[test]
     fn rm_ext_strips_exactly_one_dwarfs_suffix() {
-        assert2::assert!(Path::new("a.dwarfs").rm_ext() == Path::new("a"));
-        assert2::assert!(Path::new("a.dwarfs.dwarfs").rm_ext() == Path::new("a.dwarfs"));
-        assert2::assert!(Path::new("dir/b.tar.dwarfs").rm_ext() == Path::new("dir/b.tar"));
+        assert!(Path::new("a.dwarfs").rm_ext() == Path::new("a"));
+        assert!(Path::new("a.dwarfs.dwarfs").rm_ext() == Path::new("a.dwarfs"));
+        assert!(Path::new("dir/b.tar.dwarfs").rm_ext() == Path::new("dir/b.tar"));
     }
 
     #[test]
     fn rm_ext_keeps_path_without_dwarfs_extension() {
-        assert2::assert!(Path::new("folder").rm_ext() == Path::new("folder"));
+        assert!(Path::new("folder").rm_ext() == Path::new("folder"));
         // 扩展名不是严格的 "dwarfs" 时不应剥离
-        assert2::assert!(Path::new("my.dwarfsfolder").rm_ext() == Path::new("my.dwarfsfolder"));
-        assert2::assert!(Path::new("my.DWARFS").rm_ext() == Path::new("my.DWARFS"));
+        assert!(Path::new("my.dwarfsfolder").rm_ext() == Path::new("my.dwarfsfolder"));
+        assert!(Path::new("my.DWARFS").rm_ext() == Path::new("my.DWARFS"));
     }
 
     #[test]
     fn add_ext_appends_dwarfs_suffix() {
-        assert2::assert!(Path::new("a").add_ext() == Path::new("a.dwarfs"));
-        assert2::assert!(Path::new("a.tar").add_ext() == Path::new("a.tar.dwarfs"));
+        assert!(Path::new("a").add_ext() == Path::new("a.dwarfs"));
+        assert!(Path::new("a.tar").add_ext() == Path::new("a.tar.dwarfs"));
     }
 }

@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn picks_z_when_nothing_used() {
-        assert2::assert!(first_unused_from_mask(0) == Some('Z'));
+        assert!(first_unused_from_mask(0) == Some('Z'));
     }
 
     #[test]
@@ -59,11 +59,11 @@ mod tests {
         // Z 和 Y 被占用时应选 X
         let mask =
             (1 << (u32::from('Z') - u32::from('A'))) | (1 << (u32::from('Y') - u32::from('A')));
-        assert2::assert!(first_unused_from_mask(mask) == Some('X'));
+        assert!(first_unused_from_mask(mask) == Some('X'));
     }
 
     #[test]
     fn returns_none_when_all_letters_used() {
-        assert2::assert!(first_unused_from_mask(0x03ff_ffff).is_none());
+        assert!(first_unused_from_mask(0x03ff_ffff).is_none());
     }
 }

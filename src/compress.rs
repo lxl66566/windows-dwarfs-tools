@@ -199,19 +199,19 @@ mod tests {
     fn run_checked_succeeds_on_zero_exit() {
         let mut cmd = Command::new("cmd");
         cmd.args(["/c", "exit 0"]);
-        assert2::assert!(run_checked(&mut cmd).is_ok());
+        assert!(run_checked(&mut cmd).is_ok());
     }
 
     #[test]
     fn run_checked_fails_on_nonzero_exit() {
         let mut cmd = Command::new("cmd");
         cmd.args(["/c", "exit 3"]);
-        assert2::assert!(run_checked(&mut cmd).is_err());
+        assert!(run_checked(&mut cmd).is_err());
     }
 
     #[test]
     fn run_checked_fails_on_missing_program() {
         let mut cmd = Command::new("definitely-not-existing-program.exe");
-        assert2::assert!(run_checked(&mut cmd).is_err());
+        assert!(run_checked(&mut cmd).is_err());
     }
 }

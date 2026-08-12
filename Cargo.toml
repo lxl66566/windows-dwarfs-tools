@@ -41,4 +41,4 @@ unused_qualifications = "warn"
 opt-level = "s"
 strip     = true
 lto       = true
-panic     = "abort"
+panic     = "unwind"

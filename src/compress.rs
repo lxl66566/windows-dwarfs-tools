@@ -5,7 +5,7 @@ use std::{
     process::Command,
 };
 
-use anyhow::Result;
+use anyhow::{Result, ensure};
 use assert2::assert;
 use once_fn::once;
 use tempfile::NamedTempFile;
@@ -50,6 +50,17 @@ pub fn unpack_all() -> Result<()> {
     Ok(())
 }
 
+/// 运行子进程并检查退出码，非零退出视为错误。
+fn run_checked(command: &mut Command) -> Result<()> {
+    let status = command.spawn()?.wait()?;
+    ensure!(
+        status.success(),
+        "`{}` exited with {status}",
+        command.get_program().to_string_lossy()
+    );
+    Ok(())
+}
+
 /// 压缩文件夹到 .dwarfs 文件。
 pub fn compress_folder_to_dwarfs(
     input_path: impl AsRef<Path>,
@@ -66,8 +77,7 @@ pub fn compress_folder_to_dwarfs(
     if let Some(level) = compression_level {
         command.arg("-l").arg(level.to_string());
     }
-    command.spawn()?.wait()?;
-    Ok(())
+    run_checked(&mut command)
 }
 
 /// 解压 dwarfs 文件到指定文件夹。
@@ -87,8 +97,7 @@ pub fn decompress_dwarfs_to_folder(
     fs::create_dir_all(output_path)?;
     let mut command = Command::new(temp_dir().join("dwarfsextract.exe"));
     command.arg("-i").arg(input_path).arg("-o").arg(output_path);
-    command.spawn()?.wait()?;
-    Ok(())
+    run_checked(&mut command)
 }
 
 /// 压缩文件或文件夹到 .dwarfs 文件。
@@ -137,4 +146,29 @@ pub fn compress_path_to_dwarfs(
         panic!("Input path does not exist: {}", input_path_ref.display());
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn run_checked_succeeds_on_zero_exit() {
+        let mut cmd = Command::new("cmd");
+        cmd.args(["/c", "exit 0"]);
+        assert2::assert!(run_checked(&mut cmd).is_ok());
+    }
+
+    #[test]
+    fn run_checked_fails_on_nonzero_exit() {
+        let mut cmd = Command::new("cmd");
+        cmd.args(["/c", "exit 3"]);
+        assert2::assert!(run_checked(&mut cmd).is_err());
+    }
+
+    #[test]
+    fn run_checked_fails_on_missing_program() {
+        let mut cmd = Command::new("definitely-not-existing-program.exe");
+        assert2::assert!(run_checked(&mut cmd).is_err());
+    }
 }

@@ -1,5 +1,6 @@
 use std::process::Command;
 
+use anyhow::{Result, bail};
 use windows::Win32::Storage::FileSystem::GetLogicalDrives;
 
 use crate::compress::{temp_dir, unpack_all};
@@ -24,21 +25,22 @@ pub fn get_first_unused_drive_letter() -> Option<String> {
 }
 
 /// 挂载 dwarfs 文件为盘符或文件夹。
-pub fn mount_dwarfs(input: std::path::PathBuf, dest: Option<String>) -> anyhow::Result<()> {
+pub fn mount_dwarfs(input: std::path::PathBuf, dest: Option<String>) -> Result<()> {
     unpack_all()?;
     let dest =
         dest.unwrap_or_else(|| get_first_unused_drive_letter().expect("No available drive letter"));
     println!("Mount {} to `{dest}`", input.display());
     let mut cmd = Command::new(temp_dir().join("dwarfs.exe"));
-    let child = cmd.arg(input).arg(dest).output()?;
-    if !child.status.success() {
-        let stderr = String::from_utf8_lossy(&child.stderr);
+    let output = cmd.arg(input).arg(dest).output()?;
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
         eprintln!("Failed to mount dwarfs file: {stderr}");
         if stderr.contains("FSD not found") {
             eprintln!(
                 "Mounting dwarfs needs WinFsp to be installed. Please install it first: https://github.com/winfsp/winfsp/releases"
             );
         }
+        bail!("dwarfs exited with {}", output.status);
     }
     Ok(())
 }

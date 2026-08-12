@@ -100,6 +100,27 @@ pub fn decompress_dwarfs_to_folder(
     run_checked(&mut command)
 }
 
+/// 将移入临时文件夹的文件恢复原位、并清理临时文件夹的 RAII guard。
+/// 无论压缩成功还是失败，都保证输入文件不丢。
+struct RestoreGuard {
+    moved_to: PathBuf,
+    original: PathBuf,
+    temp_folder: PathBuf,
+}
+
+impl Drop for RestoreGuard {
+    fn drop(&mut self) {
+        if let Err(e) = fs::rename(&self.moved_to, &self.original) {
+            eprintln!("Failed to restore input file to {}: {e}", self.original.display());
+            return;
+        }
+        // 文件移走后临时文件夹应为空，用 remove_dir 避免误删用户已有目录
+        if let Err(e) = fs::remove_dir(&self.temp_folder) {
+            eprintln!("Failed to remove temp folder {}: {e}", self.temp_folder.display());
+        }
+    }
+}
+
 /// 压缩文件或文件夹到 .dwarfs 文件。
 /// 如果输入是文件，会先创建一个与文件名相同的临时文件夹，将文件移动进去再压缩。
 /// 压缩结束后，会将临时文件夹中的文件移动回原来的位置。
@@ -122,24 +143,24 @@ pub fn compress_path_to_dwarfs(
             .parent()
             .unwrap_or_else(|| panic!("can't get parent path of {}", input_path_ref.display()))
             .join(file_name);
-        fs::create_dir_all(&temp_folder_path)?;
+        ensure!(
+            !temp_folder_path.exists(),
+            "Temporary folder already exists, refusing to overwrite: {}",
+            temp_folder_path.display()
+        );
+        fs::create_dir(&temp_folder_path)?;
         let dest_path =
             temp_folder_path.join(input_path_ref.file_name().expect("file name is empty"));
         fs::rename(input_path_ref, &dest_path)?;
-        // dbg!(&input_path_ref, &temp_folder_path, &dest_path);
-        compress_folder_to_dwarfs(
-            temp_folder_path.clone(),
-            output_path_ref.to_path_buf(),
-            compression_level,
-        )?;
-        fs::rename(dest_path, input_path_ref)?;
-        fs::remove_dir_all(temp_folder_path)?; // 清理临时文件夹
+        // 无论压缩成功与否，guard 都会把文件移回原位并清理临时文件夹
+        let _guard = RestoreGuard {
+            moved_to: dest_path,
+            original: input_path_ref.to_path_buf(),
+            temp_folder: temp_folder_path.clone(),
+        };
+        compress_folder_to_dwarfs(&temp_folder_path, output_path_ref, compression_level)?;
     } else if input_path_ref.is_dir() {
-        compress_folder_to_dwarfs(
-            input_path_ref.to_path_buf(),
-            output_path_ref.to_path_buf(),
-            compression_level,
-        )?;
+        compress_folder_to_dwarfs(input_path_ref, output_path_ref, compression_level)?;
     } else if input_path_ref.exists() {
         panic!("Unsupported input path type: {}", input_path_ref.display());
     } else {

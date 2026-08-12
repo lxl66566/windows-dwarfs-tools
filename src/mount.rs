@@ -5,6 +5,13 @@ use windows::Win32::Storage::FileSystem::GetLogicalDrives;
 
 use crate::compress::{temp_dir, unpack_all};
 
+/// 从盘符位掩码中选出 Z→A 方向首个未使用的盘符。
+fn first_unused_from_mask(drives_mask: u32) -> Option<char> {
+    ('A'..='Z')
+        .rev()
+        .find(|&c| drives_mask & (1 << (u32::from(c) - u32::from('A'))) == 0)
+}
+
 /// 获取从 Z: 到 A: 的首个未使用的盘符。
 ///
 /// # Returns
@@ -13,15 +20,7 @@ use crate::compress::{temp_dir, unpack_all};
 /// 如果所有盘符都已被使用，则返回 `None`。
 pub fn get_first_unused_drive_letter() -> Option<String> {
     let drives_mask = unsafe { GetLogicalDrives() };
-
-    for drive_char in ('A'..='Z').rev() {
-        let drive_bit = 1 << (drive_char as u32 - 'A' as u32);
-        if (drives_mask & drive_bit) == 0 {
-            return Some(format!("{drive_char}:"));
-        }
-    }
-
-    None
+    first_unused_from_mask(drives_mask).map(|c| format!("{c}:"))
 }
 
 /// 挂载 dwarfs 文件为盘符或文件夹。
@@ -44,4 +43,26 @@ pub fn mount_dwarfs(input: std::path::PathBuf, dest: Option<String>) -> Result<(
         bail!("dwarfs exited with {}", output.status);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn picks_z_when_nothing_used() {
+        assert2::assert!(first_unused_from_mask(0) == Some('Z'));
+    }
+
+    #[test]
+    fn skips_used_letters_from_z_to_a() {
+        // Z 和 Y 被占用时应选 X
+        let mask = (1 << (u32::from('Z') - u32::from('A'))) | (1 << (u32::from('Y') - u32::from('A')));
+        assert2::assert!(first_unused_from_mask(mask) == Some('X'));
+    }
+
+    #[test]
+    fn returns_none_when_all_letters_used() {
+        assert2::assert!(first_unused_from_mask(0x03FF_FFFF).is_none());
+    }
 }

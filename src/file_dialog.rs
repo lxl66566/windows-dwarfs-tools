@@ -5,14 +5,22 @@ use rfd::FileDialog;
 /// 构造过滤器显示名，例如 `"DWARFS Files (*.dwarfs)"`。
 fn make_filter_name(extensions: &[&str]) -> String {
     if extensions.len() == 1 {
-        format!("{} Files (*.{})", extensions[0].to_uppercase(), extensions[0])
+        format!(
+            "{} Files (*.{})",
+            extensions[0].to_uppercase(),
+            extensions[0]
+        )
     } else {
         let exts_display = extensions
             .iter()
             .map(|e| format!("*.{e}"))
             .collect::<Vec<_>>()
             .join(";");
-        format!("{} Files ({})", extensions.join(", ").to_uppercase(), exts_display)
+        format!(
+            "{} Files ({})",
+            extensions.join(", ").to_uppercase(),
+            exts_display
+        )
     }
 }
 

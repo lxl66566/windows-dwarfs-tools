@@ -2,7 +2,10 @@ mod compress;
 mod edit_reg;
 mod file_dialog;
 mod mount;
-use std::{io::Read, path::{Path, PathBuf}};
+use std::{
+    io::Read,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};

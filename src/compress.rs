@@ -32,7 +32,10 @@ pub fn unpack_all() -> Result<()> {
     let path3 = temp_dir().join("mkdwarfs.exe");
     let path4 = temp_dir().join("dwarfsextract.exe");
     if !path1.exists() {
-        unpack_zstd_to(include_bytes!(concat!(env!("OUT_DIR"), "/dwarfs.exe.zst")), &path1)?;
+        unpack_zstd_to(
+            include_bytes!(concat!(env!("OUT_DIR"), "/dwarfs.exe.zst")),
+            &path1,
+        )?;
     }
     if !path2.exists() {
         unpack_zstd_to(
@@ -122,12 +125,18 @@ struct RestoreGuard {
 impl Drop for RestoreGuard {
     fn drop(&mut self) {
         if let Err(e) = fs::rename(&self.moved_to, &self.original) {
-            eprintln!("Failed to restore input file to {}: {e}", self.original.display());
+            eprintln!(
+                "Failed to restore input file to {}: {e}",
+                self.original.display()
+            );
             return;
         }
         // 文件移走后临时文件夹应为空，用 remove_dir 避免误删用户已有目录
         if let Err(e) = fs::remove_dir(&self.temp_folder) {
-            eprintln!("Failed to remove temp folder {}: {e}", self.temp_folder.display());
+            eprintln!(
+                "Failed to remove temp folder {}: {e}",
+                self.temp_folder.display()
+            );
         }
     }
 }

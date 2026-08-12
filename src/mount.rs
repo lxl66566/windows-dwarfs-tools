@@ -57,12 +57,13 @@ mod tests {
     #[test]
     fn skips_used_letters_from_z_to_a() {
         // Z 和 Y 被占用时应选 X
-        let mask = (1 << (u32::from('Z') - u32::from('A'))) | (1 << (u32::from('Y') - u32::from('A')));
+        let mask =
+            (1 << (u32::from('Z') - u32::from('A'))) | (1 << (u32::from('Y') - u32::from('A')));
         assert2::assert!(first_unused_from_mask(mask) == Some('X'));
     }
 
     #[test]
     fn returns_none_when_all_letters_used() {
-        assert2::assert!(first_unused_from_mask(0x03FF_FFFF).is_none());
+        assert2::assert!(first_unused_from_mask(0x03ff_ffff).is_none());
     }
 }

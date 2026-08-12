@@ -117,17 +117,26 @@ fn add_menu_for_shell_path_prefix(
 }
 
 /// Removes context menu entries.
-pub fn remove_context_menu_entries() {
+pub fn remove_context_menu_entries() -> Result<()> {
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let classes_key = hkcu.open_subkey_with_flags("Software\\Classes", KEY_WRITE)?;
 
-    if let Ok(classes_key) = hkcu.open_subkey_with_flags("Software\\Classes", KEY_WRITE) {
-        // Since all subcommands are under the main menu item, simply recursively delete the main
-        // menu item
-        let paths_to_delete = [FILE_SHELL_PATH, DIRECTORY_SHELL_PATH, FOLDER_SHELL_PATH];
-        for path_prefix in &paths_to_delete {
-            let _ = classes_key.delete_subkey_all(format!("{path_prefix}\\{MENU_NAME}"));
+    // Since all subcommands are under the main menu item, simply recursively delete the main
+    // menu item
+    let paths_to_delete = [FILE_SHELL_PATH, DIRECTORY_SHELL_PATH, FOLDER_SHELL_PATH];
+    let mut removed_any = false;
+    for path_prefix in &paths_to_delete {
+        match classes_key.delete_subkey_all(format!("{path_prefix}\\{MENU_NAME}")) {
+            Ok(()) => removed_any = true,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {},
+            Err(e) => return Err(e.into()),
         }
     }
 
-    println!("Successfully removed context menu entries");
+    if removed_any {
+        println!("Successfully removed context menu entries");
+    } else {
+        println!("No context menu entries found, nothing to remove");
+    }
+    Ok(())
 }

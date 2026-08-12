@@ -101,7 +101,7 @@ fn main() -> Result<()> {
 fn run(cli: Cli) -> Result<()> {
     match cli.command {
         Some(Commands::Uninstall) => {
-            edit_reg::remove_context_menu_entries();
+            edit_reg::remove_context_menu_entries()?;
         },
         Some(Commands::Compress {
             input,

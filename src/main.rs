@@ -67,7 +67,8 @@ impl Drop for PauseGuard {
         // This method is called when the PauseGuard instance goes out of scope
         // whether due to normal completion or a panic
         println!("Press any key to continue...");
-        std::io::stdin().read_exact(&mut [0; 1]).unwrap();
+        // stdin may already be closed; never panic in a destructor
+        let _ = std::io::stdin().read_exact(&mut [0; 1]);
     }
 }
 

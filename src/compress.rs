@@ -5,8 +5,7 @@ use std::{
     process::Command,
 };
 
-use anyhow::{Result, ensure};
-use assert2::assert;
+use anyhow::{Context, Result, ensure};
 use once_fn::once;
 use tempfile::NamedTempFile;
 
@@ -70,8 +69,16 @@ pub fn compress_folder_to_dwarfs(
     let input_path = input_path.as_ref();
     let output_path = output_path.as_ref();
     unpack_all()?;
-    assert!(input_path.is_dir());
-    assert!(!output_path.exists());
+    ensure!(
+        input_path.is_dir(),
+        "Input path is not a directory: {}",
+        input_path.display()
+    );
+    ensure!(
+        !output_path.exists(),
+        "Output path already exists: {}",
+        output_path.display()
+    );
     let mut command = Command::new(temp_dir().join("mkdwarfs.exe"));
     command.arg("-i").arg(input_path).arg("-o").arg(output_path);
     if let Some(level) = compression_level {
@@ -93,7 +100,11 @@ pub fn decompress_dwarfs_to_folder(
         output_path.display()
     );
     unpack_all()?;
-    assert!(input_path.is_file());
+    ensure!(
+        input_path.is_file(),
+        "Input path is not a file: {}",
+        input_path.display()
+    );
     fs::create_dir_all(output_path)?;
     let mut command = Command::new(temp_dir().join("dwarfsextract.exe"));
     command.arg("-i").arg(input_path).arg("-o").arg(output_path);
@@ -132,25 +143,27 @@ pub fn compress_path_to_dwarfs(
     let input_path_ref = input_path.as_ref();
     let output_path_ref = output_path.as_ref();
     unpack_all()?;
-    assert!(input_path_ref.is_file() || input_path_ref.is_dir());
 
     if input_path_ref.is_file() {
         let file_name = input_path_ref
             .file_stem()
             .and_then(|s| s.to_str())
             .unwrap_or("temp_file");
-        let temp_folder_path = input_path_ref
+        let parent = input_path_ref
             .parent()
-            .unwrap_or_else(|| panic!("can't get parent path of {}", input_path_ref.display()))
-            .join(file_name);
+            .with_context(|| format!("can't get parent path of {}", input_path_ref.display()))?;
+        let temp_folder_path = parent.join(file_name);
         ensure!(
             !temp_folder_path.exists(),
             "Temporary folder already exists, refusing to overwrite: {}",
             temp_folder_path.display()
         );
         fs::create_dir(&temp_folder_path)?;
-        let dest_path =
-            temp_folder_path.join(input_path_ref.file_name().expect("file name is empty"));
+        let dest_path = temp_folder_path.join(
+            input_path_ref
+                .file_name()
+                .with_context(|| format!("file name is empty: {}", input_path_ref.display()))?,
+        );
         fs::rename(input_path_ref, &dest_path)?;
         // 无论压缩成功与否，guard 都会把文件移回原位并清理临时文件夹
         let _guard = RestoreGuard {
@@ -162,9 +175,9 @@ pub fn compress_path_to_dwarfs(
     } else if input_path_ref.is_dir() {
         compress_folder_to_dwarfs(input_path_ref, output_path_ref, compression_level)?;
     } else if input_path_ref.exists() {
-        panic!("Unsupported input path type: {}", input_path_ref.display());
+        anyhow::bail!("Unsupported input path type: {}", input_path_ref.display());
     } else {
-        panic!("Input path does not exist: {}", input_path_ref.display());
+        anyhow::bail!("Input path does not exist: {}", input_path_ref.display());
     }
     Ok(())
 }

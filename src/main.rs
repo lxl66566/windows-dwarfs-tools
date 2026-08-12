@@ -2,7 +2,7 @@ mod compress;
 mod edit_reg;
 mod file_dialog;
 mod mount;
-use std::{ffi::OsString, io::Read, path::PathBuf};
+use std::{io::Read, path::{Path, PathBuf}};
 
 use anyhow::Result;
 use assert2::assert;
@@ -72,23 +72,24 @@ impl Drop for PauseGuard {
     }
 }
 
-trait PathExt: Sized {
-    fn add_ext(self) -> Self;
-    fn rm_ext(self) -> Self;
+trait PathExt {
+    fn add_ext(&self) -> PathBuf;
+    fn rm_ext(&self) -> PathBuf;
 }
 
-impl PathExt for PathBuf {
-    fn add_ext(self) -> Self {
-        let mut os_string: OsString = self.into_os_string();
+impl PathExt for Path {
+    fn add_ext(&self) -> PathBuf {
+        let mut os_string = self.as_os_str().to_os_string();
         os_string.push(".dwarfs");
         PathBuf::from(os_string)
     }
 
-    fn rm_ext(self) -> Self {
-        let os_string: OsString = self.into_os_string();
-        let os_string_str = os_string.to_str().unwrap();
-        let trimmed = os_string_str.trim_end_matches(".dwarfs");
-        PathBuf::from(trimmed)
+    fn rm_ext(&self) -> PathBuf {
+        if self.extension().is_some_and(|ext| ext == "dwarfs") {
+            self.with_extension("")
+        } else {
+            self.to_path_buf()
+        }
     }
 }
 
@@ -110,11 +111,10 @@ fn run(cli: Cli) -> Result<()> {
             interactive,
         }) => {
             if interactive {
+                let default_output = input.add_ext();
                 output = file_dialog::save_file_dialog(
                     &["*.dwarfs"],
-                    input
-                        .clone()
-                        .add_ext()
+                    default_output
                         .file_name()
                         .expect(
                             "Internal error: Failed to get file name from path that will be \
@@ -126,7 +126,7 @@ fn run(cli: Cli) -> Result<()> {
                 assert!(output.is_some(), "User cancelled file selection operation");
             }
             compress_path_to_dwarfs(
-                input.clone(),
+                &input,
                 output.unwrap_or_else(|| input.add_ext()),
                 compression_level,
             )?;
@@ -137,11 +137,10 @@ fn run(cli: Cli) -> Result<()> {
             interactive,
         }) => {
             if interactive {
+                let default_output = input.rm_ext();
                 output = file_dialog::save_file_dialog(
                     &[],
-                    input
-                        .clone()
-                        .rm_ext()
+                    default_output
                         .file_name()
                         .expect(
                             "Internal error: Failed to get file name from path that will be \
@@ -152,7 +151,7 @@ fn run(cli: Cli) -> Result<()> {
                 );
                 assert!(output.is_some(), "User cancelled file selection operation");
             }
-            decompress_dwarfs_to_folder(input.clone(), output.unwrap_or_else(|| input.rm_ext()))?;
+            decompress_dwarfs_to_folder(&input, output.unwrap_or_else(|| input.rm_ext()))?;
         },
         None => {
             // When executed without arguments, add context menu entries
@@ -164,4 +163,30 @@ fn run(cli: Cli) -> Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rm_ext_strips_exactly_one_dwarfs_suffix() {
+        assert2::assert!(Path::new("a.dwarfs").rm_ext() == Path::new("a"));
+        assert2::assert!(Path::new("a.dwarfs.dwarfs").rm_ext() == Path::new("a.dwarfs"));
+        assert2::assert!(Path::new("dir/b.tar.dwarfs").rm_ext() == Path::new("dir/b.tar"));
+    }
+
+    #[test]
+    fn rm_ext_keeps_path_without_dwarfs_extension() {
+        assert2::assert!(Path::new("folder").rm_ext() == Path::new("folder"));
+        // 扩展名不是严格的 "dwarfs" 时不应剥离
+        assert2::assert!(Path::new("my.dwarfsfolder").rm_ext() == Path::new("my.dwarfsfolder"));
+        assert2::assert!(Path::new("my.DWARFS").rm_ext() == Path::new("my.DWARFS"));
+    }
+
+    #[test]
+    fn add_ext_appends_dwarfs_suffix() {
+        assert2::assert!(Path::new("a").add_ext() == Path::new("a.dwarfs"));
+        assert2::assert!(Path::new("a.tar").add_ext() == Path::new("a.tar.dwarfs"));
+    }
 }

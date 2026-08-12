@@ -48,9 +48,9 @@ pub fn unpack_all() -> Result<()> {
 }
 
 /// 压缩文件夹到 .dwarfs 文件。
-pub fn compress_folder_to_dwarfs<P: AsRef<Path>>(
-    input_path: P,
-    output_path: P,
+pub fn compress_folder_to_dwarfs(
+    input_path: impl AsRef<Path>,
+    output_path: impl AsRef<Path>,
     compression_level: Option<i32>,
 ) -> Result<()> {
     let input_path = input_path.as_ref();
@@ -68,7 +68,10 @@ pub fn compress_folder_to_dwarfs<P: AsRef<Path>>(
 }
 
 /// 解压 dwarfs 文件到指定文件夹。
-pub fn decompress_dwarfs_to_folder<P: AsRef<Path>>(input_path: P, output_path: P) -> Result<()> {
+pub fn decompress_dwarfs_to_folder(
+    input_path: impl AsRef<Path>,
+    output_path: impl AsRef<Path>,
+) -> Result<()> {
     let input_path = input_path.as_ref();
     let output_path = output_path.as_ref();
     println!(
@@ -88,9 +91,9 @@ pub fn decompress_dwarfs_to_folder<P: AsRef<Path>>(input_path: P, output_path: P
 /// 压缩文件或文件夹到 .dwarfs 文件。
 /// 如果输入是文件，会先创建一个与文件名相同的临时文件夹，将文件移动进去再压缩。
 /// 压缩结束后，会将临时文件夹中的文件移动回原来的位置。
-pub fn compress_path_to_dwarfs<P: AsRef<Path>>(
-    input_path: P,
-    output_path: P,
+pub fn compress_path_to_dwarfs(
+    input_path: impl AsRef<Path>,
+    output_path: impl AsRef<Path>,
     compression_level: Option<i32>,
 ) -> Result<()> {
     let input_path_ref = input_path.as_ref();
